@@ -145,6 +145,19 @@ def quantize (im_orig, n_quant, n_iter):
     cumulative_hist =np.cumsum(hist)
     print (cumulative_hist)
     max_per_slot = cumulative_hist[-1] // n_quant
+    print ("max_per_slot", max_per_slot)
+    z[0] = 0
+    z [-1] = 255
+    i = 0
+    for c  in range(len(cumulative_hist)):
+        if (cumulative_hist[c] > max_per_slot*i):
+            print(cumulative_hist[c])
+            z[i] = c
+            i = i+1
+
+
+    print (z,len(z))
+
     cur_iter = 0
     conv = False
     while (cur_iter < n_iter and not conv):
@@ -162,13 +175,17 @@ def quantize (im_orig, n_quant, n_iter):
 
     return [im_quant, error]
 
-pic_add = "/cs/+/usr/tomerel/IP/Ex1/pulpfiction.jpg"
+pic_add = "/cs/+/usr/tomerel/IP/Ex1/jesus.jpg"
 im = read_image(pic_add, 1)
 
+x,z,y=histogram_equalize(im)
+print ("______________________________")
+print (z)
 
-x,y = quantize (im,2,3)
-plt.imshow(im,cmap = "gray")
-plt.show()
+
+x,y = quantize (im,10,3)
+# plt.imshow(im,cmap = "gray")
+# plt.show()
 
 # print (im.flatten())
 # print(im)
