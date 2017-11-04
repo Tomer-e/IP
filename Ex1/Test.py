@@ -164,10 +164,10 @@ def quantize (im_orig, n_quant, n_iter):
     print (z,len(z))
     error = np.asarray([0 for i in range(n_iter)])
     cur_iter = 0
-    conv = False
-    while (cur_iter < n_iter and not conv):
+    while (cur_iter < n_iter):
         q = np.asarray([(z[i] * hist[z[i]] + z[i + 1] * hist[z[i + 1]]) // (hist[z[i]] + hist[z[i + 1]])
                         for i in range(len(q))])
+        z_old = z.copy()
         z[1:-1] = np.asarray([(q[i-1]+q[i])//2 for i in range(1, len(q))])
         print ("q__________________")
         print (q)
@@ -175,6 +175,11 @@ def quantize (im_orig, n_quant, n_iter):
         print (z)
         # error[cur_iter] = np.sqrt(np.sum([hist(i)*() for i in hist]))
         cur_iter +=1
+        if (z_old == z):
+            break
+
+        if (cur_iter!=n_iter):
+            error[cur_iter:] = [error[cur_iter-1]]*(n_iter-cur_iter)
     quant_hist =[0]*256
     for i in range(n_quant):
         quant_hist[z[i]:z[i+1]] = [q[i]]*(z[i+1]-z[i])
