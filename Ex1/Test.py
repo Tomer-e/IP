@@ -72,6 +72,7 @@ def yiq2rgb(imYIQ):
     rgb_im = np.dot(imYIQ.copy(), np.linalg.inv(RGB2YIQ_MATRIX.copy()).transpose())
     return rgb_im
 
+
 def histogram_equalize(im_orig):
     """
     :param im_orig: is the input grayscale or RGB float64 image with values in [0, 1].
@@ -102,7 +103,7 @@ def histogram_equalize(im_orig):
     print(norm_cumulative_hist)
     # print(hist_eq)
     # print("__________________________________________")
-    im_eq = np.interp(im.flatten(),range(256), norm_cumulative_hist).reshape (im.shape)
+    im_eq = norm_cumulative_hist[im]##np.interp(im.flatten(),range(256), norm_cumulative_hist).reshape (im.shape)
     # print (im_eq)
     # print("__________________________________________")
     hist_eq =  np.histogram(im_eq,256,range = (0,255))[0]
@@ -115,8 +116,9 @@ def histogram_equalize(im_orig):
     # print (im)
     # print (hist_orig.shape)
     print ("AAAAAAAAAAAAAAAAAAAAAAAA", dims)
-    im_eq /= 255
     if (dims>2):
+        ##TODO :: CHECK /255 ISSUES (RGB/GREY)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        im_eq /= 255
         img[:, :, 0] = im_eq
         im_eq = yiq2rgb(img)
 
@@ -143,31 +145,48 @@ def quantize (im_orig, n_quant, n_iter):
     q = np.asarray([0 for i in range (n_quant)])
     hist = np.histogram(im,256,range = (0,255))[0]
     cumulative_hist =np.cumsum(hist)
-    print (cumulative_hist)
+    # print (cumulative_hist)
     max_per_slot = cumulative_hist[-1] // n_quant
-    print ("max_per_slot", max_per_slot)
+    # print ("max_per_slot", max_per_slot)
     z[0] = 0
-    z [-1] = 255
     i = 0
-    for c  in range(len(cumulative_hist)):
+
+    ## TODO : loops over 256 are not allowed.
+    for c  in range(1,len(cumulative_hist)):
         if (cumulative_hist[c] > max_per_slot*i):
-            print(cumulative_hist[c])
+            # print(cumulative_hist[c])
             z[i] = c
             i = i+1
+    z[0] = 0
+    z [-1] = 255
 
-
+    print (q)
     print (z,len(z))
-
+    error = np.asarray([0 for i in range(n_iter)])
     cur_iter = 0
     conv = False
     while (cur_iter < n_iter and not conv):
-        break
-
-
-    error = np.asarray([0 for i in range(n_iter)])
+        q = np.asarray([(z[i] * hist[z[i]] + z[i + 1] * hist[z[i + 1]]) // (hist[z[i]] + hist[z[i + 1]])
+                        for i in range(len(q))])
+        z[1:-1] = np.asarray([(q[i-1]+q[i])//2 for i in range(1, len(q))])
+        print ("q__________________")
+        print (q)
+        print ("z__________________")
+        print (z)
+        # error[cur_iter] = np.sqrt(np.sum([hist(i)*() for i in hist]))
+        cur_iter +=1
+    quant_hist =[0]*256
+    for i in range(n_quant):
+        quant_hist[z[i]:z[i+1]] = [q[i]]*(z[i+1]-z[i])
+    quant_hist = np.asarray(quant_hist,np.uint8)
+    print (quant_hist)
+    print (im)
+    im = quant_hist[im]
+    print (im)
     print(z.shape, error.shape)
-    im = im / 255
     if (dims>2):
+        ##TODO :: CHECK /255 ISSUES (RGB/GREY)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        im = im / 255
         img[:, :, 0] = im
         im_quant = yiq2rgb(img)
     else:
@@ -175,17 +194,17 @@ def quantize (im_orig, n_quant, n_iter):
 
     return [im_quant, error]
 
-pic_add = "/cs/+/usr/tomerel/IP/Ex1/jesus.jpg"
+pic_add = "pulpfiction.jpg"
 im = read_image(pic_add, 1)
 
-x,z,y=histogram_equalize(im)
-print ("______________________________")
-print (z)
+# x,z,y=histogram_equalize(im)
+# print ("______________________________")
+# print (z)
 
+plt.imshow(im,cmap = "gray")
+plt.show()
+im_quant,y = quantize (im,3,10)
 
-x,y = quantize (im,10,3)
-# plt.imshow(im,cmap = "gray")
-# plt.show()
 
 # print (im.flatten())
 # print(im)
@@ -197,8 +216,8 @@ x,y = quantize (im,10,3)
 # for item in RGB2YIQ_MATRIX:
 #     print(item)
 # print(yiq2rgb(rgb2yiq(im)).shape)
-# plt.imshow(im_eq,cmap = "gray")
-# plt.show()
+plt.imshow(im_quant,cmap = "gray")
+plt.show()
 
 # print(im.shape[0]*im.shape[1])
 # print(im.dtype)
