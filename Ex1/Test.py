@@ -165,18 +165,20 @@ def quantize (im_orig, n_quant, n_iter):
     error = np.asarray([0 for i in range(n_iter)])
     cur_iter = 0
     while (cur_iter < n_iter):
-        q = np.asarray([(z[i] * hist[z[i]] + z[i + 1] * hist[z[i + 1]]) // (hist[z[i]] + hist[z[i + 1]])
-                        for i in range(len(q))])
+        # q = np.asarray([(z[i] * hist[z[i]] + z[i+ 1] * hist[z[i + 1]]) / (hist[z[i]] + hist[z[i + 1]])
+        #                 for i in range(len(q))])
+
+        q = [np.sum(np.asarray(range(z[i],z[i+1]+1)).dot(hist[z[i]:z[i+1]+1]))/np.sum(hist[z[i]:z[i+1]+1]) for i in range((len(q)))]
         z_old = z.copy()
-        z[1:-1] = np.asarray([(q[i-1]+q[i])//2 for i in range(1, len(q))])
+        z[1:-1] = np.asarray([(q[i-1]+q[i])/2 for i in range(1, len(q))],np.float64)
         print ("q__________________")
         print (q)
         print ("z__________________")
         print (z)
         # error[cur_iter] = np.sqrt(np.sum([hist(i)*() for i in hist]))
         cur_iter +=1
-        if (z_old == z):
-            break
+        # if (np.equal(z_old , z)):
+        #     break
 
         if (cur_iter!=n_iter):
             error[cur_iter:] = [error[cur_iter-1]]*(n_iter-cur_iter)
@@ -205,11 +207,16 @@ im = read_image(pic_add, 1)
 # x,z,y=histogram_equalize(im)
 # print ("______________________________")
 # print (z)
-
-plt.imshow(im,cmap = "gray")
+imk = im.copy()
+plt.imshow(imk,cmap = "gray")
 plt.show()
-im_quant,y = quantize (im,3,10)
 
+im_quant,y = quantize (im,5,10)
+
+# im = (yiq2rgb(rgb2yiq(im)))
+plt.imshow(im_quant,cmap = "gray")
+plt.show()
+# print (np.max(np.subtract(im,imk)))
 
 # print (im.flatten())
 # print(im)
@@ -221,8 +228,8 @@ im_quant,y = quantize (im,3,10)
 # for item in RGB2YIQ_MATRIX:
 #     print(item)
 # print(yiq2rgb(rgb2yiq(im)).shape)
-plt.imshow(im_quant,cmap = "gray")
-plt.show()
+# plt.imshow(im_quant,cmap = "gray")
+# plt.show()
 
 # print(im.shape[0]*im.shape[1])
 # print(im.dtype)
