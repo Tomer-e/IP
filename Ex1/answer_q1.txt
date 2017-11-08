@@ -1,0 +1,3 @@
+q1 answer:
+the procedure will crash because if there are no pixels between z[i] to z[i+1], trying to divide in the Q
+calculation will cause division by zero.
