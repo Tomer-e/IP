@@ -13,8 +13,6 @@ def read_image(filename, representation):
     a grayscale image (1) or an RGB image (2).
     """
     im = imread(filename, mode="RGB")
-    # print (im)
-    #im = im.astype(np.float64)
     if (representation == 1 and im.ndim > 2):
         im = rgb2gray(im)
     elif (representation == 1):
@@ -45,22 +43,8 @@ def rgb2yiq(imRGB):
     :param imRGB:
     :return: height × width × 3 np.float64 matrix with values in [0, 1].
     """
-    # imRGB = np.asanyarray(imRGB)
-    # redIm = imRGB[:,:,0]
-    # greenIm = imRGB[:,:,1]
-    # blueIm = imRGB[:,:,2]
-    # redIm *= RGB2YIQ_MATRIX[0][0] # 0.299
-    # blueIm *= RGB2YIQ_MATRIX[0][1]
-    # greenIm *= RGB2YIQ_MATRIX[0][2]
-    # imRGB[:,:,0] = redIm + blueIm + greenIm
-    # imRGB[:,:,1] = redIm + blueIm + greenIm
-    # imRGB[:,:,2] = redIm + blueIm + greenIm
-    # np.dot(imRGB,RGB2YIQ_MATRIX.transpose()
-    yiq_im = np.dot(imRGB.copy(), RGB2YIQ_MATRIX.copy().transpose())
-    # imRGB = np.dot(imRGB,RGB2YIQ_MATRIX)
-    # plt.imshow(np.dot(imRGB,RGB2YIQ_MATRIX)[:,:,0], cmap="gray")
 
-    # plt.show()
+    yiq_im = np.dot(imRGB.copy(), RGB2YIQ_MATRIX.copy().transpose())
     return yiq_im
 
 
@@ -89,36 +73,15 @@ def histogram_equalize(im_orig):
     else:
         im = im_orig.copy()
     im = (im * 255).astype(np.uint8)
-    print (im)
-    # print (np.histogram(im,256,range = (0,255))[0])
-    # print("__________________________________________")
-
     hist_orig = np.histogram(im,256,range = (0,255))[0]
-    # print(hist_orig)
     cumulative_hist = np.cumsum(hist_orig)
-    ##(np.asarray(cumulative_hist/N)*255)
-    #TODO fix the m!!!!!!!!(by the formula)
     m = np.argmax(cumulative_hist>0)
-    # print (m)
-    # if ()
     lut = np.asarray([((k-cumulative_hist[m])*255/(cumulative_hist[-1]-cumulative_hist[m])) for k in cumulative_hist])\
         .astype(np.uint8)
-    # print(lut)
-    # print(hist_eq)
-    # print("__________________________________________")
+
     im_eq = lut[im]##np.interp(im.flatten(),range(256), norm_cumulative_hist).reshape (im.shape)
-    # print (im_eq)
-    # print("__________________________________________")
     hist_eq =  np.histogram(im_eq,256,range = (0,255))[0]
-    # norm_cumulative_hist = [x*255//N for x in cumulative_hist]
-    # norm_cumulative_hist = np.asarray([x*/N for x in cumulative_hist]).astype(np.uint8)
-    # print (norm_cumulative_hist)
-    # print(norm_cumulative_hist)
-    # print(cumulative_hist)
-    # print(np.histogram(im,256)[0])
-    # print (im)
-    # print (hist_orig.shape)
-    # print ("AAAAAAAAAAAAAAAAAAAAAAAA", dims)
+
     im_eq = im_eq / 255
     if (dims>2):
         ##TODO :: CHECK /255 ISSUES (RGB/GREY)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -149,40 +112,24 @@ def quantize (im_orig, n_quant, n_iter):
     z = np.asarray([0]* (n_quant+1))
     q = np.asarray([0.0 for i in range (n_quant)])
     hist = np.histogram(im,256,range = (0,255))[0]
-    # print (hist)
     cumulative_hist =np.cumsum(hist)
-    # print (cumulative_hist)
     max_per_slot = cumulative_hist[-1] // n_quant
-    # print ("max_per_slot", max_per_slot)
     z[0] = 0
-    i = 0
 
     for i in range (n_quant):
         z[i] = np.argmax(cumulative_hist>=max_per_slot*i)
     z[0] = 0.0
     z [-1] = 255
-
-    # print (q)
-    # print (z,len(z))
     error = []
     cur_iter = 0
 
     while (cur_iter < n_iter):
-        # q = np.asarray([(z[i] * hist[z[i]] + z[i+ 1] * hist[z[i + 1]]) / (hist[z[i]] + hist[z[i + 1]])
-        #                 for i in range(len(q))])
-        # TODO :: error calc:
+
         err_calc = [0.0]*256
-        # g = np.sum(np.asarray(range(z[0],z[1] + 1)).dot(hist[z[0]:z[1] + 1])) / np.sum(
-        #         hist[z[0]:z[1] + 1])
+
         q[0] = np.sum(np.asarray(range(z[0],z[1] + 1)).dot(hist[z[0]:z[1] + 1])) / np.sum(
                 hist[z[0]:z[1] + 1])
-        # print (g)
-        # a = np.asarray(range(z[i]+1,z[i+1]+1))
-        # b = hist[z[i]+1:z[i+1]+1]
-        # c = np.dot(a,b)
-        # d = np.sum(hist[z[i]:z[i+1]])
-        # f = np.asarray( [(np.dot(np.asarray(range(z[i]+1,z[i+1]+1)),hist[z[i]+1:z[i+1]+1])) / np.sum(hist[z[i]+1:z[i+1]+1]) for i in range(1,len(q))])
-        # print ("f",f)
+
         q[1:]=np.asarray([(np.dot(np.asarray(range(z[i]+1,z[i+1]+1)),hist[z[i]+1:z[i+1]+1])) /
                            np.sum(hist[z[i]+1:z[i+1]+1]) for i in range(1,len(q))])
         for i in range(n_quant):
@@ -191,14 +138,9 @@ def quantize (im_orig, n_quant, n_iter):
         error.append(np.dot(hist,err_calc))
         z_old = z.copy()
         z[1:-1] = np.asarray([(q[i-1]+q[i])//2 for i in range(1, len(q))])
-        # print ("q__________________")
-        # print (q)
-        # print ("z__________________")
-        # print (z)
-        # error[cur_iter] = np.sqrt(np.sum([hist(i)*() for i in hist]))
+
         cur_iter +=1
         if (np.array_equal(z_old , z)):
-            # print ("Wow", cur_iter-1)
             break
 
     quant_hist =[0]*256
