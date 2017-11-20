@@ -68,6 +68,8 @@ def conv_der(im):
     dx = convolve2d(im, conv, mode="same")
     conv = conv.T
     dy = convolve2d(im, conv, mode="same")
+    # plt.imshow(dy, cmap="gray")
+
     magnitude = np.sqrt(np.abs(dx) ** 2 + np.abs(dy) ** 2)
     print(magnitude)
     return magnitude
@@ -132,7 +134,6 @@ def blur_fourier(im, kernel_size):
     blur_F = np.multiply(im_F, kernel_F)
     return np.fft.ifftshift(np.fft.ifft2(blur_F))
 
-
 # print(calc_kernel())
 add = "../Ex1/pulpfiction.jpg"
 my_pic = read_image(add, 1)
@@ -142,12 +143,12 @@ my_pic = read_image(add, 1)
 # plt.imshow(my,cmap="gray")
 # plt.show()
 
-bs = blur_fourier(my_pic, 31)
-print(bs)
-bs = np.real_if_close(bs, 1000000)
-# c = conv_der(my_pic)
+# bs = blur_fourier(my_pic, 31)
+# print(bs)
+# bs = np.real_if_close(bs, 1000000)
+c = conv_der(my_pic)
 # f = fourier_der(my_pic)
-plt.imshow(bs, cmap="gray")
+plt.imshow(c, cmap="gray")
 plt.show()
 # a = dft_matrix(5)
 # b = np.asarray([5, 1, 2, 3, 4]).reshape(5, 1)

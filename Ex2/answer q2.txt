@@ -1,0 +1,4 @@
+actually nothing(as long as all the gaussian exist in our new image, i.e we can get the image
+ in which the center of the gaussian is at (0,0) by shifting), since fourier transform is not local
+(the transform supplies a global representation of the image in the frequency domain). In the two images
+we have the same frequencies.
