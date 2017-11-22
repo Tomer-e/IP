@@ -64,7 +64,7 @@ def IDFT2(fourier_image):
 
 
 def conv_der(im):
-    conv = np.array([[1, 0. - 1]]) * 0.5
+    conv = np.array([[1, 0. - 1]]) ## TODO * 0.5
     dx = convolve2d(im, conv, mode="same")
     conv = conv.T
     dy = convolve2d(im, conv, mode="same")
@@ -79,13 +79,13 @@ def fourier_der(im):
     rows, cols = im.shape
     exp_const_x = np.pi * 2j / rows
     exp_const_y = np.pi * 2j / cols
-    F = np.fft.fftshift(np.fft.fft2(im))
+    F = np.fft.fftshift(DFT2(im))
     U_s = np.fromfunction(lambda u, v: u - (rows // 2), (rows, cols)) * exp_const_x
 
-    print(U_s)
-    dx = np.fft.ifft2(np.multiply(F, U_s))
+    # print(U_s)
+    dx = IDFT2(np.multiply(F, U_s))
     V_x = np.fromfunction(lambda u, v: v - (cols // 2), (rows, cols)) * exp_const_y
-    dy = np.fft.ifft2(np.multiply(F, V_x))
+    dy = IDFT2(np.multiply(F, V_x))
     magnitude = np.sqrt(np.abs(dx) ** 2 + np.abs(dy) ** 2)
     return magnitude
 
@@ -129,14 +129,14 @@ def blur_fourier(im, kernel_size):
                                     ((cols - k_c) // 2, (cols - k_c) // 2 + c)), mode="constant")
     print("im =  ", im.shape)
     print("kernel = ", padded_kernel.shape)
-    kernel_F = np.fft.fft2(padded_kernel)
-    im_F = np.fft.fft2(im)
+    kernel_F = DFT2(padded_kernel)
+    im_F = DFT2(im)
     blur_F = np.multiply(im_F, kernel_F)
-    return np.fft.ifftshift(np.fft.ifft2(blur_F))
+    return np.fft.ifftshift(IDFT2(blur_F))
 
 # print(calc_kernel())
-add = "../Ex1/pulpfiction.jpg"
-my_pic = read_image(add, 1)
+# add = "../Ex1/ss.jpg"
+# my_pic = read_image(add, 1)
 # my = blur_fourier(my_pic,11)
 # my = fourier_der(my)
 #
@@ -146,10 +146,12 @@ my_pic = read_image(add, 1)
 # bs = blur_fourier(my_pic, 31)
 # print(bs)
 # bs = np.real_if_close(bs, 1000000)
-c = conv_der(my_pic)
+# c = conv_der(my_pic)
 # f = fourier_der(my_pic)
-plt.imshow(c, cmap="gray")
-plt.show()
+# plt.imshow(f, cmap="gray")
+# plt.show()
+# plt.imshow(c, cmap="gray")
+# plt.show()
 # a = dft_matrix(5)
 # b = np.asarray([5, 1, 2, 3, 4]).reshape(5, 1)
 # print(a)
@@ -158,7 +160,7 @@ plt.show()
 # my_im = np.asarray(range(30)).reshape(5,6)
 # for i in my_im:
 #     print (i)
-# my = IDFT2(DFT2(my_im))
+# my = IDFT2(DFT2(my_pic))
 # dft1 = DFT2(my_pic)
 #
 # dft2 = IDFT2(dft1)
@@ -167,7 +169,7 @@ plt.show()
 # plt.show()
 #
 #
-# nps = np.fft.ifft2(np.fft.fft2(my_im))
+# nps = np.fft.ifft2(np.fft.fft2(my_pic))
 #
 # print(np.allclose(my,nps))
 #
