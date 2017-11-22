@@ -1,0 +1,2 @@
+no difference is expected between blur_fourier and blur_spatial (due to the convolution theorem), 
+actually the images are a bit different probably due to information getting lost when we casting from complex to real numbers.

@@ -1,0 +1,4 @@
+when we derives in the Fourier space ,multiplying by "u" gives more weight to the higher
+frequencies than lower frequencies ==> for example image derivative in the fourier space will cause the edges to
+be brighter then image derivatives in image space(we convolve with [1 0 -1] - all the frequencies
+get the same weight)
